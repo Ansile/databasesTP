@@ -46,7 +46,7 @@ class RequestHandler(tornado.web.RequestHandler):
 
         for decorator in self.on_initialize_decorators:
             meth = decorator(self)(meth)
-
+        self.set_header('Content-Type', 'application/json')
         setattr(self, self.request.method.lower(), meth)
 
     def set_headers(self, items):

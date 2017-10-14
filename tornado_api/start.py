@@ -60,6 +60,8 @@ def main():
     http_server.start(config.WORKER)
     tornado.ioloop.IOLoop.current().start()
 
+    tornado.web.RequestHandler.set_header(tornado.web.RequestHandler,'application/json')
+
 
 if __name__ == "__main__":
     main()
