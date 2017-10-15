@@ -4,6 +4,8 @@ from start import db
 from . import ApiHandler
 from .. import schemas
 from ..utils import clear_dict
+import traceback
+
 
 error = {
   "message": "Can't find user with id #42\n"
@@ -16,31 +18,41 @@ class UserNicknameProfile(ApiHandler):
         with db.xact():
             user_select = db.prepare('SELECT * FROM "user" WHERE nickname = $1::CITEXT')
             user = user_select.first(nickname)
-        print(user)
-        return clear_dict({'nickname': user[1], 'about': user[2], 'email':user[3],
-                'fullname': user[4]}), 200
+        if user:
+            return clear_dict({'nickname': user[1], 'about': user[2], 'email':user[3],
+                    'fullname': user[4]}), 200
+        else:
+            return error, 404
 
     def post(self, nickname):
-        # print(self.json)
         about = self.json.get('about')
         email = self.json.get('email')
         fullname = self.json.get('fullname')
         try:
             with db.xact():
-                if about is not None:
-                    user_select = db.prepare('''UPDATE "user" SET about = $2, email = $3, fullname = $4 
+                if self.json:
+                    user_update = db.prepare('''UPDATE "user" SET about = coalesce($2, about), 
+                                             email = coalesce($3, email),
+                                             fullname = coalesce($4, fullname) 
                                              WHERE nickname = $1::CITEXT''')
-                    affected = user_select.first(nickname, about, email, fullname)
+                    affected = user_update.first(nickname, about, email, fullname)
+                    if affected is 0:
+                       return error, 404
+                # elif self.json:
+                #     user_update = db.prepare('''UPDATE "user" SET email = $2, fullname = $3
+                #                              WHERE nickname = $1::CITEXT''')
+                #     affected = user_update.first(nickname, email, None, fullname)
+                user_select = db.prepare('SELECT * FROM "user" WHERE nickname = $1::CITEXT')
+                user = user_select.first(nickname)
+                if user:
+                    about = user[2]
+                    email = user[3]
+                    fullname = user[4]
                 else:
-                    user_select = db.prepare('''UPDATE "user" SET email = $2, fullname = $3 
-                                             WHERE nickname = $1::CITEXT''')
-                    affected = user_select.first(nickname, email, fullname)
-
-                if affected == 0:
-                   return error, 404
-                print('affected= ' + str(affected))
-
+                    return error, 404
             return {'fullname': fullname, 'email': email, 'nickname': nickname, 'about': about}, 200, None
-        except:
+        except Exception as f:
+            var = traceback.format_exc()
+            print(var)
             return error, 409
 

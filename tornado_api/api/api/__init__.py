@@ -5,7 +5,9 @@ from core import RequestHandler
 from .. import UserInfo
 from ..validators import request_validate, response_filter
 
-
+error = {
+  "message": "Can't find user with id #42\n"
+}
 class ApiHandler(RequestHandler):
     on_initialize_decorators = [response_filter, request_validate]
 

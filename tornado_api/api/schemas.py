@@ -892,68 +892,68 @@ validators = {
    },
    ('thread_slug_or_id_create',
    'POST'   ):{  
-      'json':{  
-         'items':{  
-            'required':[  
-               'author',
-               'message'
-            ],
-            'type':'object',
-            'description':'Сообщение внутри ветки обсуждения на форуме.\n',
-            'properties':{  
-               'forum':{  
-                  'readOnly':True,
-                  'type':'string',
-                  'description':'Идентификатор форума (slug) данного сообещния.',
-                  'format':'identity'
-               },
-               'parent':{  
-                  'type':'number',
-                  'description':'Идентификатор родительского сообщения (0 - корневое сообщение обсуждения).\n',
-                  'format':'int64'
-               },
-               'author':{  
-                  'x-isnullable':False,
-                  'format':'identity',
-                  'type':'string',
-                  'example':'j.sparrow',
-                  'description':'Автор, написавший данное сообщение.'
-               },
-               'created':{  
-                  'x-isnullable':True,
-                  'format':'date-time',
-                  'type':'string',
-                  'readOnly':True,
-                  'description':'Дата создания сообщения на форуме.'
-               },
-               'thread':{  
-                  'readOnly':True,
-                  'type':'number',
-                  'description':'Идентификатор ветви (id) обсуждения данного сообещния.',
-                  'format':'int32'
-               },
-               'isEdited':{  
-                  'x-isnullable':False,
-                  'type':'boolean',
-                  'readOnly':True,
-                  'description':'Истина, если данное сообщение было изменено.'
-               },
-               'message':{  
-                  'x-isnullable':False,
-                  'format':'text',
-                  'type':'string',
-                  'example':'We should be afraid of the Kraken.',
-                  'description':'Собственно сообщение форума.'
-               },
-               'id':{  
-                  'readOnly':True,
-                  'type':'number',
-                  'description':'Идентификатор данного сообщения.',
-                  'format':'int64'
+      'json':{
+            'items':{
+               'required':[
+                  'author',
+                  'message'
+               ],
+               'type':'object',
+               'description':'Сообщение внутри ветки обсуждения на форуме.\n',
+               'properties':{
+                  'forum':{
+                     'readOnly':True,
+                     'type':'string',
+                     'description':'Идентификатор форума (slug) данного сообещния.',
+                     'format':'identity'
+                  },
+                  'parent':{
+                     'type':'number',
+                     'description':'Идентификатор родительского сообщения (0 - корневое сообщение обсуждения).\n',
+                     'format':'int64'
+                  },
+                  'author':{
+                     'x-isnullable':False,
+                     'format':'identity',
+                     'type':'string',
+                     'example':'j.sparrow',
+                     'description':'Автор, написавший данное сообщение.'
+                  },
+                  'created':{
+                     'x-isnullable':True,
+                     'format':'date-time',
+                     'type':'string',
+                     'readOnly':True,
+                     'description':'Дата создания сообщения на форуме.'
+                  },
+                  'thread':{
+                     'readOnly':True,
+                     'type':'number',
+                     'description':'Идентификатор ветви (id) обсуждения данного сообещния.',
+                     'format':'int32'
+                  },
+                  'isEdited':{
+                     'x-isnullable':False,
+                     'type':'boolean',
+                     'readOnly':True,
+                     'description':'Истина, если данное сообщение было изменено.'
+                  },
+                  'message':{
+                     'x-isnullable':False,
+                     'format':'text',
+                     'type':'string',
+                     'example':'We should be afraid of the Kraken.',
+                     'description':'Собственно сообщение форума.'
+                  },
+                  'id':{
+                     'readOnly':True,
+                     'type':'number',
+                     'description':'Идентификатор данного сообщения.',
+                     'format':'int64'
+                  }
                }
-            }
-         },
-         'type':'array'
+            },
+            'type':'array'
       }
    },
    ('thread_slug_or_id_details',

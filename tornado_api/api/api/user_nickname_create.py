@@ -5,10 +5,10 @@ from . import ApiHandler
 from .. import schemas
 from start import db
 from ..utils import clear_dict
+import tornado.escape
 
 
 class UserNicknameCreate(ApiHandler):
-
     def post(self, nickname):
         about = self.json.get('about')
         email = self.json.get('email')
