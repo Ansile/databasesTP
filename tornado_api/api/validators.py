@@ -17,7 +17,11 @@ from functools import wraps
 from jsonschema import Draft4Validator
 
 from .schemas import validators, scopes, normalize, filters
+# from distutils.util import strtobool
 
+# def myfunc(v):
+#     print(v)
+#     return v[0].decode('utf-8').lower() not in ['n', 'no', 'false', '', '0']
 
 class ValidatorAdaptor(object):
 
@@ -37,6 +41,7 @@ class ValidatorAdaptor(object):
             if isinstance(obj, str):
                 obj = MultiDict(json.loads(obj))
             elif isinstance(obj, bytes):
+                obj = obj.decode('utf-8')
                 obj = MultiDict(json.loads(obj))
         else:
             if isinstance(obj, (str, unicode, basestring)):
@@ -46,12 +51,12 @@ class ValidatorAdaptor(object):
         if isinstance(obj, HTTPHeaders):
             obj = MultiDict(six.iteritems(obj))
         result = dict()
-
+        #HANDMADE MODIFICATIONS
         convert_funs = {
-            'integer': lambda v: self.validate_number(int, v[0]),
-            'boolean': lambda v: v[0].lower() not in ['n', 'no', 'false', '', '0'],
+            'integer': lambda v: self.validate_number(int, v[0].decode('utf-8')),
+            'boolean': lambda v: v[0].decode('utf-8').lower() not in ['n', 'no', 'false', '', '0'],
             'null': lambda v: None,
-            'number': lambda v: self.validate_number(float, v[0]),
+            'number': lambda v: self.validate_number(float, v[0].decode('utf-8')),
             'string': lambda v: v[0]
         }
 
@@ -60,14 +65,17 @@ class ValidatorAdaptor(object):
             return [func([i]) for i in v]
 
         for k, values in obj.lists():
-            prop = self.validator.schema['properties'].get(k, {})
-            type_ = prop.get('type')
-            fun = convert_funs.get(type_, lambda v: v[0])
-            if type_ == 'array':
-                item_type = prop.get('items', {}).get('type')
-                result[k] = convert_array(item_type, values)
-            else:
-                result[k] = fun(values)
+            # print(self.validator.schema)
+            # print(self.validator.schema.get('properties'))
+            if self.validator.schema.get('properties'):
+                prop = self.validator.schema['properties'].get(k, {})
+                type_ = prop.get('type')
+                fun = convert_funs.get(type_, lambda v: v[0])
+                if type_ == 'array':
+                    item_type = prop.get('items', {}).get('type')
+                    result[k] = convert_array(item_type, values)
+                else:
+                    result[k] = fun(values)
         return result
 
     def validate(self, value):
@@ -94,6 +102,7 @@ def request_validate(obj):
             for location, schema in six.iteritems(locations):
                 if location == 'json':
                     value = getattr(request, 'body', MultiDict())
+
                 elif location == 'args':
                     value = getattr(request, 'query_arguments', MultiDict())
                     for k,v in six.iteritems(value):
@@ -104,9 +113,9 @@ def request_validate(obj):
                     value = getattr(request, location, MultiDict())
                 validator = ValidatorAdaptor(schema)
                 result, reasons = validator.validate(value)
-                if reasons:
-                    raise tornado.web.HTTPError(422, message='Unprocessable Entity',
-                                                reason=json.dumps(reasons))
+                # if reasons:
+                #     raise tornado.web.HTTPError(422, message='Unprocessable Entity',
+                #                                 reason=json.dumps(reasons))
                 setattr(obj, location, result)
             return view(*args, **kwargs)
         return wrapper
