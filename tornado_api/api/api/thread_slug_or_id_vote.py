@@ -12,7 +12,6 @@ from ..utils import time_normalize
 class ThreadSlugOrIdVote(ApiHandler):
 
     def post(self, slug_or_id):
-        print(self.json)
         nickname = self.json['nickname']
         voice = self.json['voice']
         thread_id = None

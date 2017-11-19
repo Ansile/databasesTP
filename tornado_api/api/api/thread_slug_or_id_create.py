@@ -7,6 +7,12 @@ from .. import schemas
 from start import db
 from . import error
 import arrow
+import re
+from ..utils import time_normalize, int_convert
+from postgresql.types import Array
+
+
+Debug = False
 
 class ThreadSlugOrIdCreate(ApiHandler):
     # def initialize(self):
@@ -24,24 +30,26 @@ class ThreadSlugOrIdCreate(ApiHandler):
         authors = []
         if not self.json:
             return [], 201
-        created = arrow.Arrow.utcnow().isoformat(sep=' ')
+        created = time_normalize(arrow.Arrow.utcnow())
             # created = self.json[0]['created']
         # for item in self.json:
         #     authors.append(item['author'])
         try:
-                with db.xact():
-                    if thread_id is not None:
-                        thread_select = db.prepare('SELECT * FROM thread WHERE id = $1::BIGINT')
-                        thread = thread_select.first(thread_id)
-                    else:
-                        thread_select = db.prepare('SELECT * FROM thread WHERE slug = $1::CITEXT')
-                        thread = thread_select.first(slug)
-                    if not thread:
-                        return error, 404
+            with db.xact():
+                if thread_id is not None:
+                    thread_select = db.prepare('SELECT * FROM thread WHERE id = $1::BIGINT')
+                    thread = thread_select.first(thread_id)
+                else:
+                    thread_select = db.prepare('SELECT * FROM thread WHERE slug = $1::CITEXT')
+                    thread = thread_select.first(slug)
+                if not thread:
+                    return error, 404
+
                 thread_id = thread[0]
                 author_select = db.prepare('SELECT * FROM "user" WHERE nickname = ANY($1)')
+
                 message_insert = db.prepare('INSERT INTO message VALUES (DEFAULT, $1::TEXT::TIMESTAMP, $2::TEXT, FALSE,'
-                                            ' $3::BIGINT, $4::BIGINT, $5::BIGINT, $6::BIGINT) RETURNING id')
+                                            ' $3::BIGINT, $4::BIGINT, $5::BIGINT, $6::BIGINT, $7::BIGINT[] || $8::BIGINT)')
 
                 forum_select = db.prepare('SELECT * FROM forum WHERE id = $1::BIGINT')
                 forum = forum_select.first(thread[6])
@@ -58,23 +66,44 @@ class ThreadSlugOrIdCreate(ApiHandler):
                     id_to_nickname[author_id] = author_nickname
 
                 messages = []
+                message_parent_select = db.prepare('SELECT parenttree FROM message where message.id = $1::BIGINT')
                 for item in self.json:
-                    messages.append((created, item['message'], nickname_to_id[item['author']], item.get('parent', 0),
-                                    thread_id, forum_id))
+                    parent_id = item.get('parent', None)
+                    message_parent = None
+                    if parent_id:
+                        message_parent = message_parent_select.first(parent_id)
+                        messages.append((created, item['message'], nickname_to_id[item['author']], item.get('parent', None),
+                                    thread_id, forum_id, message_parent, parent_id))
+                    else:
+                        messages.append((created, item['message'], nickname_to_id[item['author']], item.get('parent', None),
+                                    thread_id, forum_id, Array([]), 0))
+
                 message_insert.load_rows(messages)
                 last_id_select = db.prepare('select CURRVAL(\'message_id_seq\')')
                 last_id = last_id_select.first()
-                print('author_records')
-                print(author_records)
-                print(last_id)
-                created = arrow.get(created).isoformat()
+                if Debug:
+                    print('author_records')
+                    print(author_records)
+                    print(last_id)
+                    print(created)
+                    print(type(created))
+                created = time_normalize(created, json_format=True)
+                if Debug:
+                    print('created')
+                    print(created)
+                    print(len(created))
+                    print(repr(created))
+                    print(type(created))
                 result = []
                 message_count = len(messages)
                 for counter in range(message_count):
                     x = messages[counter]
-                    result.append({'created': created, 'message': x[1], 'author': id_to_nickname[x[2]],
-                                   'id': last_id - message_count + counter + 1, 'parent': x[3],
-                                   'thread': thread_id, 'forum': forum_slug})
+                    message = {'created': created, 'message': x[1], 'author': id_to_nickname[x[2]],
+                               'id': last_id - message_count + counter + 1, 'parent': int_convert(x[3]),
+                               'thread': thread_id, 'forum': forum_slug}
+                    if Debug:
+                        print(message)
+                    result.append(message)
                     counter += 1
 
                 return result, 201
@@ -83,4 +112,4 @@ class ThreadSlugOrIdCreate(ApiHandler):
             print(traceback.format_exc())
 
 
-        return [], 201, None
+        # return [], 201, None

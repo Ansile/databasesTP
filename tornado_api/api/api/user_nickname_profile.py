@@ -51,7 +51,7 @@ class UserNicknameProfile(ApiHandler):
                 else:
                     return error, 404
             return {'fullname': fullname, 'email': email, 'nickname': nickname, 'about': about}, 200, None
-        except Exception as f:
+        except:
             var = traceback.format_exc()
             print(var)
             return error, 409

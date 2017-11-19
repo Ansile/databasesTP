@@ -11,7 +11,7 @@ class ForumSlugDetails(ApiHandler):
     def get(self, slug):
         forum_select = db.prepare('SELECT * FROM forum WHERE slug = $1::CITEXT')
         forum = forum_select.first(slug)
-        print(forum)
+        
         if forum:
             user_select = db.prepare('SELECT * FROM "user" WHERE id = $1::BIGINT')
             user = user_select.first(forum[3])
