@@ -4,7 +4,7 @@ from __future__ import absolute_import, print_function
 import tornado.escape
 from . import ApiHandler
 from .. import schemas
-from start import db
+from .db_queries import db
 from . import error
 import arrow
 import re
@@ -30,6 +30,7 @@ class ThreadSlugOrIdCreate(ApiHandler):
         authors = []
 
         created = time_normalize(arrow.Arrow.utcnow())
+        # created_json = time_normalize(created, for_json=True)
             # created = self.json[0]['created']
         # for item in self.json:
         #     authors.append(item['author'])
@@ -109,7 +110,8 @@ class ThreadSlugOrIdCreate(ApiHandler):
                     print(last_id)
                     print(created)
                     print(type(created))
-                created = time_normalize(created, json_format=True)
+                    
+                created_json = time_normalize(created, for_json=True)
                 if Debug:
                     print('created')
                     print(created)
@@ -120,7 +122,7 @@ class ThreadSlugOrIdCreate(ApiHandler):
                 message_count = len(messages)
                 for counter in range(message_count):
                     x = messages[counter]
-                    message = {'created': created, 'message': x[1], 'author': id_to_nickname[x[2]],
+                    message = {'created': created_json, 'message': x[1], 'author': id_to_nickname[x[2]],
                                'id': last_id - message_count + counter + 1, 'parent': int_convert(x[3]),
                                'thread': thread_id, 'forum': forum_slug}
                     if Debug:

@@ -19,8 +19,8 @@ RUN apt-get install -y postgresql-contrib-$POSTGRESV
 USER postgres
 
 RUN /etc/init.d/postgresql start &&\
-    psql --command "CREATE USER docker WITH SUPERUSER PASSWORD 'docker';" &&\
-    createdb -E UTF8 -T template0 -O docker docker &&\
+    psql --command "CREATE USER ansile WITH SUPERUSER PASSWORD '123456789';" &&\
+    createdb -E UTF8 -T template0 -O ansile technopark &&\
     /etc/init.d/postgresql stop
 
 RUN echo "host all  all    0.0.0.0/0  trust" >> /etc/postgresql/$POSTGRESV/main/pg_hba.conf
@@ -37,11 +37,17 @@ USER root
 ADD tornado_api/ $WORKDIR/tornado_api/
 ADD DBSchema.sql $WORKDIR/DBSchema.sql
 
-EXPOSE 5000
+RUN echo "Europe/Moscow" > /etc/timezone
 
-ENV PGPASSWORD docker
+EXPOSE 5000
+ENV TZ Europe/Moscow
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+ENV PGPASSWORD 123456789
 CMD service postgresql start &&\
     cd $WORKDIR/ &&\
-    psql -h localhost -U docker -d docker -f DBSchema.sql -w &&\
-    cd $WORKDIR/tornado_api/ &&\
-    gunicorn -b :5000 start:main
+    psql -h localhost -U ansile -d technopark -f DBSchema.sql -w &&\
+    cat /etc/timezone &&\
+    date &&\
+    # pg_dump -h localhost -U ansile -c technopark &&\
+    python3 ./tornado_api/start.py

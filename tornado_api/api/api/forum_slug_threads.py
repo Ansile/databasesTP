@@ -2,7 +2,7 @@
 from __future__ import absolute_import, print_function
 
 from . import error
-from start import db
+from .db_queries import db
 from . import ApiHandler
 from .. import schemas
 from ..utils import clear_dict, time_normalize, timestamp

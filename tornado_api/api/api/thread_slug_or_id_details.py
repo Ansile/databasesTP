@@ -4,10 +4,10 @@ from __future__ import absolute_import, print_function
 from . import ApiHandler
 from .. import schemas
 from ..utils import clear_dict, time_normalize, slug_and_id
-from .db_queries import thread_select_by_id, thread_select_by_slug, forum_select_by_id,\
+from .db_queries import db, thread_select_by_id, thread_select_by_slug, forum_select_by_id,\
     user_select_by_id
 
-from start import db
+# from start import db
 from . import error
 
 

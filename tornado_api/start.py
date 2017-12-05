@@ -10,7 +10,6 @@ from core import load_tornado_settings
 
 modules = ['api']
 config = load_tornado_settings(*modules)
-db = postgresql.open('pq://ansile:123456789@localhost:5432/technopark')
 
 class Application(tornado.web.Application):
     def __init__(self, url_list, **app_settings):

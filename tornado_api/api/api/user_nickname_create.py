@@ -3,9 +3,10 @@ from __future__ import absolute_import, print_function
 
 from . import ApiHandler
 from .. import schemas
-from start import db
+from .db_queries import db
 from ..utils import clear_dict
 import tornado.escape
+from postgresql import exceptions
 
 Debug = False
 
@@ -20,7 +21,7 @@ class UserNicknameCreate(ApiHandler):
                 user_insert = db.prepare('INSERT INTO "user" VALUES (DEFAULT, $1::citext, $2::citext, $3::citext, '
                                          '$4::citext)')
                 user_insert(nickname, about, email, fullname)
-        except:
+        except exceptions.UniqueError:
             if Debug:
                 print('email' + email)
             user_select = db.prepare('SELECT * FROM "user" WHERE nickname = $1::citext OR email = $2::citext')

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function
 
-from start import db
+from .db_queries import db
 from . import ApiHandler
 from . import error
 from .. import schemas
@@ -154,7 +154,7 @@ class ThreadSlugOrIdPosts(ApiHandler):
 
         result = []
         for x in messages:
-            message = {'id': x[0], 'created': time_normalize(x[1], json_format=True), 'message': x[2],
+            message = {'id': x[0], 'created': time_normalize(x[1], for_json=True), 'message': x[2],
                        'thread': x[3], 'parent': int_convert(x[4]), 'author': x[5], 'forum': x[6]}
             result.append(message)
         if Debug:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function
 
-from start import db
+from .db_queries import db
 from . import ApiHandler
 from .. import schemas
 from . import error
@@ -22,7 +22,10 @@ class ForumSlugCreate(ApiHandler):
         try:
             with db.xact():
                 if created:
-                    created = time_normalize(created)
+                    db_created = time_normalize(created)
+                    created = time_normalize(created, for_json=True)
+                else:
+                    db_created = None
 
                 author_select = db.prepare('SELECT * FROM "user" WHERE nickname = $1::CITEXT')
                 forum_select = db.prepare('SELECT * FROM forum WHERE slug = $1::CITEXT')
@@ -34,7 +37,7 @@ class ForumSlugCreate(ApiHandler):
                 author = author_select.first(author)
                 if not author:
                     return error, 404
-                thread_id = thread_create.first(thread_slug, created, message, title, author[0], forum[0])
+                thread_id = thread_create.first(thread_slug, db_created, message, title, author[0], forum[0])
                 # Debug
                 # thread_select = db.prepare('SELECT * FROM thread WHERE id = $1::BIGINT')
                 # thread = thread_select.first(thread_id)
@@ -57,4 +60,4 @@ class ForumSlugCreate(ApiHandler):
             forum = db.prepare('SELECT * FROM forum WHERE id = $1::BIGINT').first(forum_id)
 
             return clear_dict({'slug': thread[1], 'forum': forum[1], 'message': thread[3], 'title': thread[4],
-                               'author': author[1], 'id': thread_id, 'created': time_normalize(thread[2])}), 409
+                               'author': author[1], 'id': thread_id, 'created': time_normalize(thread[2], for_json=True)}), 409

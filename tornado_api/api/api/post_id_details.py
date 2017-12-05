@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function
 
-from start import db
+from .db_queries import db
 from . import error
 from . import ApiHandler
 from ..utils import clear_dict, time_normalize
@@ -82,7 +82,7 @@ class PostIdDetails(ApiHandler):
         else:
             user = None
 
-        post = { 'id': id, 'created': time_normalize(message[0]), 'message': message[1], 'author': message[2],
+        post = { 'id': id, 'created': time_normalize(message[0], for_json=True), 'message': message[1], 'author': message[2],
             'thread': message[3], 'forum': message[4], 'isEdited': message[5]}
          
 
@@ -120,5 +120,5 @@ class PostIdDetails(ApiHandler):
         if not message:
             return error, 404
         #Consider returning less  {remove thread} (Optimisation)
-        return { 'id': id, 'created': time_normalize(message[0]), 'message': message[1], 'author': message[2],
+        return { 'id': id, 'created': time_normalize(message[0], for_json=True), 'message': message[1], 'author': message[2],
             'thread': message[3], 'forum': message[4], 'isEdited': message[5] }, 200, None

@@ -23,7 +23,7 @@ create table thread
 (
   id         BIGSERIAL PRIMARY KEY,
   slug       CITEXT UNIQUE,
-  created_on TIMESTAMPTZ,
+  created_on TIMESTAMP,
   message    TEXT,
   title      TEXT,
   authorid   BIGINT REFERENCES "user" (id),
@@ -34,14 +34,14 @@ create table thread
 create table message
 (
   id         BIGSERIAL PRIMARY KEY,
-  created_on TIMESTAMPTZ,
+  created_on TIMESTAMP,
   message    TEXT,
   isedited   BOOLEAN,
   authorid   BIGINT REFERENCES "user" (id),
   parentid   BIGINT REFERENCES message (id) DEFAULT 0,
-  parenttree BIGINT[] DEFAULT '{0}',
   threadid   BIGINT REFERENCES thread (id),
-  forumid    BIGINT REFERENCES forum (id)
+  forumid    BIGINT REFERENCES forum (id),
+  parenttree BIGINT[] DEFAULT '{0}'
 
 )
 ;
@@ -51,7 +51,7 @@ create table vote
   voice      INT CHECK (voice in (1, -1)),
   userid     BIGINT REFERENCES "user" (id),
   threadid   BIGINT REFERENCES thread (id),
-  unique(userid, threadid)
+  CONSTRAINT unique_vote UNIQUE (userid, threadid)
 )
 ;
 

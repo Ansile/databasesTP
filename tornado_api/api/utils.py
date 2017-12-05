@@ -1,16 +1,21 @@
+import arrow
+
 def clear_dict(_dict):
     return {k: v for k, v in _dict.items() if v is not None}
 
 
-def time_normalize(time, json_format=False, db_format=False):
-    import arrow
+def time_normalize(time, for_json=False, db_format=False):
     time = arrow.get(time,)
-    time = time.to('+03:00')
+    
+    if not for_json:
+        time = time.to('utc')
+    else:
+        time = time.to('local')
 
     if db_format:
         return time.isoformat(sep=' ')
-    if json_format:
-        return time.for_json()
+    # if json_format:
+    #     return time.for_json()
     return time.isoformat()
 
 

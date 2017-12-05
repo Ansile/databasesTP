@@ -3,8 +3,7 @@ from __future__ import absolute_import, print_function
 
 from . import ApiHandler
 from .. import schemas
-from start import db
-from .db_queries import user_select_by_nickname, thread_select_by_slug, thread_select_by_id,\
+from .db_queries import db, user_select_by_nickname, thread_select_by_slug, thread_select_by_id,\
     forum_select_by_id, user_select_by_id
 from . import error
 from ..utils import time_normalize, slug_and_id
