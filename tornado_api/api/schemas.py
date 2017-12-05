@@ -262,10 +262,10 @@ DefinitionsPost={
 
 DefinitionsStatus={  
    'required':[  
-      'user',
-      'forum',
-      'thread',
-      'post'
+      # 'user',
+      # 'forum',
+      # 'thread',
+      # 'post'
    ],
    'type':'object',
    'properties':{  

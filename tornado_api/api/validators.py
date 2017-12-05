@@ -42,7 +42,16 @@ class ValidatorAdaptor(object):
                 obj = MultiDict(json.loads(obj))
             elif isinstance(obj, bytes):
                 obj = obj.decode('utf-8')
-                obj = MultiDict(json.loads(obj))
+                # print('json-conv')
+                # print(obj)
+                # print(json.loads(obj))
+                # for a, b in json.loads(obj):
+                #     pass
+                obj = json.loads(obj)
+                if isinstance(obj, list):
+                    obj = [MultiDict(x) for x in obj]
+                else:
+                    obj = MultiDict(obj)
         else:
             if isinstance(obj, (str, unicode, basestring)):
                 obj = MultiDict(json.loads(obj))
@@ -56,7 +65,7 @@ class ValidatorAdaptor(object):
             'integer': lambda v: self.validate_number(int, v[0].decode('utf-8')),
             'boolean': lambda v: v[0].decode('utf-8').lower() not in ['n', 'no', 'false', '', '0'],
             'null': lambda v: None,
-            'number': lambda v: self.validate_number(float, v[0].decode('utf-8')),
+            'number': lambda v: self.validate_number(float, v[0]),
             'string': lambda v: v[0]
         }
 
@@ -90,10 +99,10 @@ def request_validate(obj):
             request = obj.request
             endpoint = obj.endpoint
             user_info = obj.current_user
-            if (endpoint, request.method) in scopes and not set(
-                    scopes[(endpoint, request.method)]
-            ).issubset(set(user_info.scopes)):
-                raise tornado.web.HTTPError(403)
+            # if (endpoint, request.method) in scopes and not set(
+            #         scopes[(endpoint, request.method)]
+            # ).issubset(set(user_info.scopes)):
+            #     raise tornado.web.HTTPError(403)
 
             method = request.method
             if method == 'HEAD':
@@ -105,13 +114,15 @@ def request_validate(obj):
 
                 elif location == 'args':
                     value = getattr(request, 'query_arguments', MultiDict())
-                    for k,v in six.iteritems(value):
+                    for k, v in six.iteritems(value):
                         if isinstance(v, list) and len(v) == 1:
                             value[k] = v[0]
                     value = MultiDict(value)
                 else:
                     value = getattr(request, location, MultiDict())
                 validator = ValidatorAdaptor(schema)
+                # print('value')
+                # print(value)
                 result, reasons = validator.validate(value)
                 # if reasons:
                 #     raise tornado.web.HTTPError(422, message='Unprocessable Entity',
@@ -146,10 +157,10 @@ def response_filter(obj):
 
                 schemas = filter.get(status)
                 if not schemas:
+                    pass
                     # return resp, status, headers
-                    raise tornado.web.HTTPError(
-                        500, message='`%d` is not a defined status code.' % status)
-
+                    # raise tornado.web.HTTPError(
+                    #     500, message='`%d` is not a defined status code.' % status)
                 resp, errors = normalize(schemas['schema'], resp)
                 if schemas['headers']:
                     headers, header_errors = normalize(

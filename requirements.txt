@@ -3,3 +3,5 @@ jsonschema
 six
 werkzeug
 arrow
+gunicorn
+py-postgresql

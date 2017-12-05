@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function
-from start import db
+
+from .db_queries import db
 from . import ApiHandler
 from .. import schemas
 from ..utils import clear_dict
@@ -51,7 +52,7 @@ class UserNicknameProfile(ApiHandler):
                 else:
                     return error, 404
             return {'fullname': fullname, 'email': email, 'nickname': nickname, 'about': about}, 200, None
-        except Exception as f:
+        except:
             var = traceback.format_exc()
             print(var)
             return error, 409

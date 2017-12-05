@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, print_function
 
-from start import db
+from .db_queries import db
 from . import ApiHandler
 from .. import schemas
 from . import error
@@ -36,7 +36,7 @@ class ForumCreate(ApiHandler):
         except:
             forum_select = db.prepare('SELECT * FROM forum WHERE slug = $1::CITEXT')
             forum = forum_select.first(slug)
-            print(forum)
+            
             if forum:
                 user_select = db.prepare('SELECT * FROM "user" WHERE id = $1::BIGINT')
                 user = user_select.first(forum[3])
