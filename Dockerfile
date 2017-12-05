@@ -14,6 +14,8 @@ ADD requirements.txt $WORKDIR/requirements.txt
 
 RUN pip3 install -r requirements.txt
 
+RUN apt-get install -y postgresql-contrib-$POSTGRESV
+
 USER postgres
 
 RUN /etc/init.d/postgresql start &&\
@@ -37,8 +39,9 @@ ADD DBSchema.sql $WORKDIR/DBSchema.sql
 
 EXPOSE 5000
 
-ENV POSTGRESPWD docker
+ENV PGPASSWORD docker
 CMD service postgresql start &&\
     cd $WORKDIR/ &&\
-    psql -h localhost -U docker:docker -d docker -f DBSchema.sql -w &&\
-    gunicorn -b :5000 main:app
+    psql -h localhost -U docker -d docker -f DBSchema.sql -w &&\
+    cd $WORKDIR/tornado_api/ &&\
+    gunicorn -b :5000 start:main
